@@ -1,0 +1,476 @@
+<!--
+
+Вывести данные первого задания в интерфейс.
+Сверстать в html простую таблицу выводящую данные по дням.
+В интерфейсе должны быть 2 кнопки позволяющие выбирать предыдущее и следующее число.
+
+Пример:
+
+	2020.12.01
+	111 - 1000000
+	222 - 100000
+
+<							>
+
+кнопки должны менять дату, и к каждой дате должен тянуться свой.
+
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		body {
+		    background-color: #b8d9c1;
+		}
+
+		.table-container {
+		    margin: auto;
+		    width: 70%;
+		}
+
+		.table-container table {
+		    width: 100%;
+		    border-collapse: collapse;
+		    text-align: center;
+		}
+
+		.table-container caption {
+		    color: #fff;
+		    font-size: 1.5rem;
+		    text-shadow: 1px 1px 1px #000;
+		    margin-top: 0.5em;
+		    margin-bottom: 0.5em;
+		}
+
+		.table-container thead {
+		    background: #626569;
+		    color: #fff;
+		}
+
+		.table-container thead th {
+		    border: 1px solid #fff;
+		    border-top: unset;
+		}
+
+		.table-container thead th:first-of-type {
+		    border-left: unset;
+		}
+
+		.table-container thead th:last-of-type {
+		    border-right: unset;
+		}
+
+		.table-container tbody {
+		    background-color: #eee;
+		    color: #000;
+		}
+
+		.table-container tbody tr:nth-child(even) {
+		    background-color: #b7baba;
+		}
+
+		.table-container tbody td {
+		    border: 1px solid #000;
+		    border-bottom: unset;
+		}
+
+		.table-container tbody td:first-of-type {
+		    border-left: unset;
+		}
+
+		.table-container tbody td:last-of-type {
+		    border-right: unset;
+		}
+
+		.table-container tfoot td button{
+		    float: right;
+		}
+
+		.table-container tfoot td button::after {
+		    content: '';
+		    display: table;
+		    clear: both;
+		}
+
+		.table-container tfoot td:first-of-type button{
+		    float: left;
+		}
+
+
+		/* Media queries */
+		@media (max-width: 767px) {
+		    .table-container {
+		        width: 90%;
+		    }
+
+		    .table-container table {
+		        text-align: left;
+		        display: flex;
+		        flex-direction: column;
+		    }
+		    
+		    .table-container thead {
+		        display: none;
+		    }
+
+		    .table-container tbody {
+		        display: flex;
+		        flex-direction: column;
+		    }
+
+		    .table-container tbody td {
+		        display: block;
+		        padding: 0.3em;
+		        margin: auto;
+		    }
+
+		    .table-container tbody td {
+		        border-left: unset;
+		        border-right: unset;
+		    }
+
+		    .table-container tbody tr:first-of-type td:first-of-type {
+		        border-top: unset;
+		    }
+
+		    .table-container tbody tr:last-of-type td:last-of-type {
+		        border-bottom: unset;
+		    }
+
+		    .table-container tbody td::before {
+		        content: attr(data-th) ": ";
+		        font-weight: 700;
+		        display: inline-block;
+		        margin-right: 1em;
+		        margin-left: 0.5em;
+		        width: 7em;
+		    }
+
+		    .table-container tfoot tr {
+		        display: flex;
+		        justify-content: space-between;
+		    }
+		}
+	</style>
+	<title>Employee list</title>
+</head>
+<body>
+	<div class="table-container">
+		<table>
+			<caption></caption>
+			<thead>
+				<tr>
+					<th class="employee-id">Id</th>
+					<th class="employee-name">Name</th>
+					<th class="employee-salary">Salary</th>
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+			<tfoot>
+				<tr>
+					<td>
+						<button class="prev">Prev.</button>
+					</td>
+					<td></td>
+					<td>
+						<button class="next">Next.</button>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	<script>
+		
+		function groupByDate(employees) {
+			// helper function
+			let defineEmployeeProp = (fillingEmployee, initEmployee) => {
+				// this function changes the initial object (the fillingEmployee object)
+				fillingEmployee[initEmployee.id] = {
+					"salary": initEmployee.salary,
+					"name"  : initEmployee.name
+				};
+			};
+
+			// collection var
+			let grouped = {};
+
+			employees.forEach((employee) => {		
+
+				// if there is no field as given date
+				if (!grouped[employee.date]) {
+
+					// then create it and fill in with corresponding data
+					grouped[employee.date] = {};
+
+					defineEmployeeProp(grouped[employee.date], employee);
+					
+				} else {
+					// else go through all fields of the collection
+					Object.keys(grouped).forEach((key) => {
+
+						// and find corresponding field to the given data
+						// by checking fields one by one
+						let d1 = new Date(key).getTime();
+						let d2 = new Date(employee.date).getTime();
+						
+						if (d1 === d2) {
+							// when the corresponding field is found
+							// fill it in with the given data
+							defineEmployeeProp(grouped[key], employee);
+						}
+					});
+				}
+			});
+
+			// finally return the grouped collection
+			return grouped;
+		}
+
+
+
+		function getElements() {
+			const caption = document.querySelector('.table-container caption');
+			const thId = document.querySelector('th.employee-id');
+			const thName = document.querySelector('th.employee-name');
+			const thSalary = document.querySelector('th.employee-salary');
+
+			return {
+				caption: caption,
+				thId: thId,
+				thName: thName,
+				thSalary: thSalary
+			};
+		}
+
+		function initTable(employees) {
+			
+			// getting elements
+			const captionEl = document.querySelector('.table-container caption');
+			const thead = document.querySelector('.table-container thead tr');
+			const tbody = document.querySelector('.table-container tbody');
+			const prevBtn = document.querySelector('.table-container .prev');
+			const nextBtn = document.querySelector('.table-container .next');
+			
+			// preparing captions
+			let captions = Object.keys(employees);
+
+			captionEl.textContent = captions[0];
+
+			const ids = Object.keys(employees[captions[0]]);
+
+			ids.forEach(id => {
+				// init a row for a single employee
+				const tr = document.createElement('tr');
+			
+				for (let i = 0; i < thead.childElementCount; i++) {
+					// getting the corresponding heading
+					const headingClass = thead.children[i].classList[0];		
+					let headingTitle = headingClass.substring(headingClass.indexOf('-') + 1);
+					headingTitle = headingTitle.charAt(0).toUpperCase() + headingTitle.slice(1);
+
+					// init a column for a single data item
+					const td = document.createElement('td');
+					td.classList.add(headingClass);
+					td.setAttribute('data-th', headingTitle);
+
+					// adding content to the column
+					if (headingTitle === 'Id') {
+						td.textContent = id;
+					}
+					else {
+						td.textContent = employees[captions[0]][id][headingTitle.toLowerCase()];
+					}
+
+					// putting into the parent element
+					tr.append(td);
+				}
+				// putting to the DOM
+				tbody.append(tr);
+			});
+
+			prevBtn.addEventListener('click', () => {
+				
+				for (let index=0; index<captions.length; index++) {
+
+					const d1 = new Date(captions[index]).getTime();
+					const d2 = new Date(captionEl.textContent).getTime();
+					
+					if (d1 === d2) {
+						if (captions[index-1]) {
+							const nextCaption = captions[index-1];
+							
+							captionEl.textContent = nextCaption;
+							const ids = Object.keys(employees[captions[index-1]]);
+							
+							// refresh the DOM
+							tbody.innerHTML = '';
+							
+							ids.forEach(id => {
+								// init a row for a single employee
+								const tr = document.createElement('tr');
+							
+								for (let i = 0; i < thead.childElementCount; i++) {
+									// getting the corresponding heading
+									const headingClass = thead.children[i].classList[0];		
+									let headingTitle = headingClass.substring(headingClass.indexOf('-')+1);
+									
+									headingTitle = headingTitle.charAt(0).toUpperCase() + headingTitle.slice(1);
+						
+									// init a column for a single data item
+									const td = document.createElement('td');
+									td.classList.add(headingClass);
+									td.setAttribute('data-th', headingTitle);
+						
+									// adding content to the column
+									if (headingTitle === 'Id') {
+										td.textContent = id;
+									}
+									else {
+										td.textContent = employees[captions[index-1]][id][headingTitle.toLowerCase()];
+									}
+
+									// putting into the parent element
+									tr.append(td);
+								}
+
+								// putting to the DOM
+								tbody.append(tr);
+
+							});
+
+							break;
+
+
+						
+						}
+					}
+				}
+
+			}, false);
+
+			nextBtn.addEventListener('click', () => {
+				
+				for (let index=0; index<captions.length; index++) {
+
+					const d1 = new Date(captions[index]).getTime();
+					const d2 = new Date(captionEl.textContent).getTime();
+					
+					if (d1 === d2) {
+						if (captions[index+1]) {
+							const nextCaption = captions[index+1];
+							
+							captionEl.textContent = nextCaption;
+							const ids = Object.keys(employees[captions[index+1]]);
+							
+							// refresh the DOM
+							tbody.innerHTML = '';
+							
+							ids.forEach(id => {
+								// init a row for a single employee
+								const tr = document.createElement('tr');
+							
+								for (let i = 0; i < thead.childElementCount; i++) {
+									// getting the corresponding heading
+									const headingClass = thead.children[i].classList[0];		
+									let headingTitle = headingClass.substring(headingClass.indexOf('-')+1);
+									
+									headingTitle = headingTitle.charAt(0).toUpperCase() + headingTitle.slice(1);
+						
+									// init a column for a single data item
+									const td = document.createElement('td');
+									td.classList.add(headingClass);
+									td.setAttribute('data-th', headingTitle);
+						
+									// adding content to the column
+									if (headingTitle === 'Id') {
+										td.textContent = id;
+									}
+									else {
+										td.textContent = employees[captions[index+1]][id][headingTitle.toLowerCase()];
+									}
+
+									// putting into the parent element
+									tr.append(td);
+								}
+
+								// putting to the DOM
+								tbody.append(tr);
+
+							});
+
+							break;
+
+
+						
+						}
+					}
+				}
+
+			}, false);
+			
+
+		}
+
+		window.onload = (()=>{
+			const employees = [
+				{
+					id: 111,
+					name: 'Azat',
+					salary: 11000,
+					date: '2020-12-01'
+				},
+				{
+					id: 222,
+					name: 'Boris',
+					salary: 120000,
+					date: '2020-11-01'
+				},
+				{
+					id: 333,
+					name: 'Valihan',
+					salary: 130000,
+					date: '2020-10-01'
+				},
+				{
+					id: 444,
+					name: 'Grigoriy',
+					salary: 140000,
+					date: '2020-09-02'
+				},
+				{
+					id: 555,
+					name: 'Diana',
+					salary: 150000,
+					date: '2020-09-01'
+				},
+				{
+					id: 666,
+					name: 'Egor',
+					salary: 160000,
+					date: '2020-10-01'
+				},
+				{
+					id: 777,
+					name: 'Jandos',
+					salary: 170000,
+					date: '2020-11-01'
+				},
+				{
+					id: 888,
+					name: 'Zinaida',
+					salary: 1000000,
+					date: '2020-12-02'
+				}
+			];
+			console.log(groupByDate(employees));
+			initTable(groupByDate(employees));
+		})();
+
+	</script>
+</body>
+</html>
